@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslHandler;
 import org.mockserver.codec.MockServerServerCodec;
+import org.mockserver.filters.record.RequestAndResponseRecorder;
 import org.mockserver.logging.LoggingHandler;
 import org.mockserver.mock.MockServerMatcher;
 import org.mockserver.proxy.Proxy;
@@ -23,11 +24,17 @@ public class MockServerInitializer extends PortUnificationHandler {
     private final MockServerMatcher mockServerMatcher;
     private final boolean secure;
     private final MockServer mockServer;
+    private final RequestAndResponseRecorder recorder;
 
     public MockServerInitializer(MockServerMatcher mockServerMatcher, MockServer mockServer, boolean secure) {
+        this(mockServerMatcher, mockServer, null, secure);
+    }
+
+    public MockServerInitializer(MockServerMatcher mockServerMatcher, MockServer mockServer, RequestAndResponseRecorder recorder, boolean secure) {
         this.mockServerMatcher = mockServerMatcher;
         this.secure = secure;
         this.mockServer = mockServer;
+        this.recorder = recorder;
     }
 
     @Override
@@ -40,6 +47,10 @@ public class MockServerInitializer extends PortUnificationHandler {
         pipeline.addLast(new MockServerServerCodec(secure));
 
         // add mock server handlers
-        pipeline.addLast(new MockServerHandler(mockServer, mockServerMatcher, ctx.channel().attr(MockServer.LOG_FILTER).get()));
+        if (recorder == null) {
+            pipeline.addLast(new MockServerHandler(mockServer, mockServerMatcher, ctx.channel().attr(MockServer.LOG_FILTER).get()));
+        } else {
+            pipeline.addLast(new MockServerHandler(mockServer, mockServerMatcher, ctx.channel().attr(MockServer.LOG_FILTER).get(), recorder));
+        }
     }
 }

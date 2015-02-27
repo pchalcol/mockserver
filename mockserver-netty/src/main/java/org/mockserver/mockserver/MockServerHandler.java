@@ -11,6 +11,7 @@ import org.mockserver.client.serialization.HttpRequestSerializer;
 import org.mockserver.client.serialization.VerificationSequenceSerializer;
 import org.mockserver.client.serialization.VerificationSerializer;
 import org.mockserver.filters.LogFilter;
+import org.mockserver.filters.record.RequestAndResponseRecorder;
 import org.mockserver.mock.Expectation;
 import org.mockserver.mock.MockServerMatcher;
 import org.mockserver.mock.action.ActionHandler;
@@ -45,6 +46,13 @@ public class MockServerHandler extends SimpleChannelInboundHandler<HttpRequest> 
         this.server = server;
         this.logFilter = logFilter;
         actionHandler = new ActionHandler(logFilter);
+    }
+
+    public MockServerHandler(MockServer server, MockServerMatcher mockServerMatcher, LogFilter logFilter, RequestAndResponseRecorder recorder) {
+        this.mockServerMatcher = mockServerMatcher;
+        this.server = server;
+        this.logFilter = logFilter;
+        actionHandler = new ActionHandler(logFilter, recorder);
     }
 
     @Override

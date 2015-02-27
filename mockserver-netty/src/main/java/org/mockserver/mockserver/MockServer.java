@@ -10,6 +10,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.AttributeKey;
 import org.mockserver.filters.LogFilter;
+import org.mockserver.filters.record.RequestAndResponseRecorder;
 import org.mockserver.mock.MockServerMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,10 @@ public class MockServer {
      * @param port the http port to use
      */
     public MockServer(final Integer port) {
+        this(port, null);
+    }
+    
+    public MockServer(final Integer port, final RequestAndResponseRecorder recorder) {
         if (port == null) {
             throw new IllegalStateException("You must specify a port");
         }
@@ -59,7 +64,7 @@ public class MockServer {
                             .group(bossGroup, workerGroup)
                             .channel(NioServerSocketChannel.class)
                             .option(ChannelOption.SO_BACKLOG, 1024)
-                            .childHandler(new MockServerInitializer(mockServerMatcher, MockServer.this, false))
+                            .childHandler(new MockServerInitializer(mockServerMatcher, MockServer.this, recorder, false))
                             .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                             .childAttr(LOG_FILTER, logFilter)
                             .bind(port)

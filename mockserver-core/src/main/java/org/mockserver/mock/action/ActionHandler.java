@@ -3,6 +3,7 @@ package org.mockserver.mock.action;
 import org.mockserver.filters.Filters;
 import org.mockserver.filters.HopByHopHeaderFilter;
 import org.mockserver.filters.LogFilter;
+import org.mockserver.filters.record.RequestAndResponseRecorder;
 import org.mockserver.model.*;
 
 import static org.mockserver.model.HttpResponse.notFoundResponse;
@@ -19,6 +20,12 @@ public class ActionHandler {
 
     public ActionHandler(LogFilter logFilter) {
         filters.withFilter(new org.mockserver.model.HttpRequest(), new HopByHopHeaderFilter());
+        filters.withFilter(new org.mockserver.model.HttpRequest(), logFilter);
+    }
+
+    public ActionHandler(LogFilter logFilter, RequestAndResponseRecorder recorder) {
+        filters.withFilter(new org.mockserver.model.HttpRequest(), new HopByHopHeaderFilter());
+        filters.withFilter(new org.mockserver.model.HttpRequest(), recorder);
         filters.withFilter(new org.mockserver.model.HttpRequest(), logFilter);
     }
 
